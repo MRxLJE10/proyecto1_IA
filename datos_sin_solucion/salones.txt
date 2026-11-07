@@ -1,0 +1,3 @@
+# id,nombre
+S1,Salon_101
+S2,Salon_102

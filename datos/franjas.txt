@@ -1,0 +1,5 @@
+# id,dia,hora
+F1,Lunes,07-09
+F2,Lunes,09-11
+F3,Martes,07-09
+F4,Martes,09-11

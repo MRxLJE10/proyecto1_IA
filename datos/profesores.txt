@@ -1,0 +1,4 @@
+# id,nombre,franjas_no_disponibles (separadas por ;)
+P1,Prof_A,F1
+P2,Prof_B
+P3,Prof_C,F2;F3
