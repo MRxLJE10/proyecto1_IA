@@ -1,0 +1,3 @@
+# Dos clases del mismo profesor y solo una franja: imposible
+C1,Calculo,P1,G1
+C2,Algebra,P1,G2
