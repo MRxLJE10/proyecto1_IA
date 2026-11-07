@@ -1,10 +1,6 @@
 """
 problema.py
 ===========
-Define el problema de horarios como un problema de búsqueda. Todos los
-algoritmos (amplitud, costo uniforme, profundidad iterativa y A*) usan esta
-misma clase, así que solo cambia la estrategia para recorrer el espacio.
-
 Elementos del problema de búsqueda:
   - Estado inicial : ninguna clase asignada.
   - Sucesores      : tomar la SIGUIENTE clase (según el orden de cursos.txt)
@@ -14,7 +10,7 @@ Elementos del problema de búsqueda:
   - Meta           : todas las clases asignadas.
 
 Espacio de búsqueda: es un árbol de profundidad N (N = número de clases).
-En la raíz hay hasta (franjas x salones) hijos; cada nivel decide una clase.
+En la raíz hay hasta (franjas x salones) hijos, cada nivel decide una clase.
 """
 
 from modelo import Estado, Asignacion
