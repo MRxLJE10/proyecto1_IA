@@ -1,7 +1,5 @@
-<<<<<<< HEAD
-# Asignación de horarios universitarios — módulos base y búsqueda no informada
+# Asignación de horarios universitarios 
 
-Python puro, sin librerías externas (solo `heapq`, `time`, `collections`, `os`, `tempfile` de la biblioteca estándar).
 
 ## Archivos
 
@@ -64,7 +62,6 @@ estadisticas = Estadisticas()
 estadisticas.agregar(resultado)
 estadisticas.filas()          # [(algoritmo, nodos, tiempo, "Si"/"No"), ...]
 ```
-Para añadir A*: crear una función `busqueda_a_estrella(problema, max_nodos=...)` que devuelva un `Resultado`. `problema.sucesores`, `es_meta`, `clases_restantes` y `COSTO_BASE` (en `problema.py`) ya están pensados para eso: una heurística admisible es `clases_restantes(estado) * COSTO_BASE`.
-=======
-# proyecto1_IA
->>>>>>> origin/main
+
+
+
