@@ -1,22 +1,3 @@
-"""
-problema.py
-===========
-Define el problema de horarios como un problema de búsqueda. Todos los
-algoritmos (amplitud, costo uniforme, profundidad iterativa y A*) usan esta
-misma clase, así que solo cambia la estrategia para recorrer el espacio.
-
-Elementos del problema de búsqueda:
-  - Estado inicial : ninguna clase asignada.
-  - Sucesores      : tomar la SIGUIENTE clase (según el orden de cursos.txt)
-                     y probar cada combinación (franja, salón) que cumpla las
-                     restricciones duras.
-  - Costo de paso  : 1 + penalizaciones blandas de esa asignación.
-  - Meta           : todas las clases asignadas.
-
-Espacio de búsqueda: es un árbol de profundidad N (N = número de clases).
-En la raíz hay hasta (franjas x salones) hijos; cada nivel decide una clase.
-"""
-
 from modelo import Estado, Asignacion
 from restricciones import (cumple_restricciones_duras, penalizacion_blanda,
                            MAX_CONSECUTIVAS)
@@ -41,13 +22,9 @@ class ProblemaHorarios:
         self.max_consecutivas = max_consecutivas
 
     def estado_inicial(self):
-        """Estado sin ninguna clase asignada."""
         return Estado()
 
     def es_meta(self, estado):
-        """Meta: todas las clases tienen asignación. Como solo se agregan
-        asignaciones que cumplen las restricciones duras, un estado completo
-        ya es un horario válido."""
         return len(estado) == len(self.cursos)
 
     def curso_siguiente(self, estado):
@@ -61,11 +38,7 @@ class ProblemaHorarios:
         return len(self.cursos) - len(estado)
 
     def sucesores(self, estado):
-        """Lista de (nuevo_estado, costo_de_paso) para el estado dado.
-
-        Se prueba cada combinación (franja, salón) para la siguiente clase y
-        solo se conservan las que no violan ninguna restricción dura.
-        """
+        """Lista de (nuevo_estado, costo_de_paso) para el estado dado."""
         curso = self.curso_siguiente(estado)
         if curso is None:
             return []

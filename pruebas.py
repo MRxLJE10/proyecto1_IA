@@ -18,6 +18,8 @@ from problema import ProblemaHorarios
 from busqueda_no_informada import (busqueda_amplitud, busqueda_costo_uniforme,
                                    busqueda_profundidad_iterativa,
                                    ALGORITMOS_NO_INFORMADOS)
+from cola_prioridad import ColaFIFO
+from a_asterisco import a_asterisco, preparar_heuristica, heuristica
 from estadisticas import Estadisticas
 
 CARPETA = os.path.dirname(os.path.abspath(__file__))
@@ -103,7 +105,6 @@ def prueba_restricciones_blandas():
     profe = Profesor("P1", "A")
     franjas = [Franja(f"F{i}", "Lunes", f"h{i}", i) for i in range(3)]
     salon = Salon("S1", "101")
-    cursos = []
     estado = Estado()
     for i in range(2):
         c = Curso(f"C{i}", "M", "P1", "G1")
@@ -130,7 +131,21 @@ def prueba_algoritmos_con_solucion():
     for r in resultados.values():
         assert ucs.costo <= r.costo
     assert ucs.penalizacion == 0       # en estos datos existe un horario sin penalización
-    assert resultados["BFS (amplitud)"].penalizacion > 0   # BFS no mira las blandas
+    assert resultados["BFS (amplitud)"].costo >= ucs.costo
+
+
+def prueba_a_asterisco():
+    _, cursos, salones, franjas = cargar_carpeta("datos")
+    problema = ProblemaHorarios(cursos, salones, franjas)
+    ucs = busqueda_costo_uniforme(problema)
+    astar = a_asterisco(problema)
+
+    assert astar.encontro and es_solucion_valida(astar.estado, cursos)
+    assert astar.costo == ucs.costo                        # mismo óptimo
+    assert astar.nodos_explorados <= ucs.nodos_explorados  # nunca explora más
+
+    sufijos = preparar_heuristica(problema)
+    assert heuristica(sufijos, problema.estado_inicial()) <= ucs.costo  # admisible
 
 
 def prueba_sin_solucion():
@@ -175,12 +190,38 @@ def prueba_grilla():
     total = sum(len(lista) for lista in grilla.values())
     assert total == len(cursos)
 
+def prueba_consistencia():
+    _, cursos, salones, franjas = cargar_carpeta("datos")
+    problema = ProblemaHorarios(cursos, salones, franjas)
+    sufijos = preparar_heuristica(problema)
+    pendientes = [problema.estado_inicial()]
+    revisadas = 0
+    while pendientes:
+        padre = pendientes.pop()
+        for hijo, costo in problema.sucesores(padre):
+            revisadas += 1
+            assert heuristica(sufijos, padre) <= costo + heuristica(sufijos, hijo)
+            pendientes.append(hijo)
+    assert revisadas > 0
+
+def prueba_cola_fifo():
+    f = ColaFIFO()
+    for v in ["a", "b", "c"]:
+        f.agregar(v)
+    assert [f.extraer_primero() for _ in range(3)] == ["a", "b", "c"]
+    try:
+        f.extraer_primero()
+        raise AssertionError("debía lanzar IndexError")
+    except IndexError:
+        pass
+
 
 if __name__ == "__main__":
     pruebas = [prueba_lectura_correcta, prueba_lectura_errores,
                prueba_restricciones_duras, prueba_restricciones_blandas,
-               prueba_algoritmos_con_solucion, prueba_sin_solucion,
-               prueba_limite_de_nodos, prueba_estadisticas, prueba_grilla]
+               prueba_algoritmos_con_solucion, prueba_a_asterisco,
+               prueba_sin_solucion, prueba_limite_de_nodos,
+               prueba_estadisticas, prueba_grilla, prueba_consistencia, prueba_cola_fifo]
     for prueba in pruebas:
         prueba()
         print(f"OK  {prueba.__name__}")

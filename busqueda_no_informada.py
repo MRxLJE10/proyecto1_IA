@@ -1,26 +1,6 @@
-"""
-busqueda_no_informada.py
-========================
-Tres algoritmos de búsqueda NO informada (no usan ninguna heurística):
-
-  1. busqueda_amplitud            (BFS)  -> cola FIFO
-  2. busqueda_costo_uniforme      (UCS)  -> cola de prioridad por costo
-  3. busqueda_profundidad_iterativa (IDS) -> profundidad limitada, límite creciente
-
-Todos reciben un ProblemaHorarios y devuelven un Resultado (estadisticas.py).
-Todos cuentan "nodos explorados" de la misma forma: cada vez que un estado se
-saca de la frontera (o se visita) para preguntar si es la meta.
-
-LÍMITE DE NODOS: el espacio de búsqueda crece muy rápido con el número de
-clases. Para que el programa no se quede pegado, cada algoritmo se detiene si
-explora 'max_nodos' nodos; en ese caso el Resultado indica que no encontró
-solución por haber superado el límite.
-"""
-
-import heapq
+from cola_prioridad import ColaPrioridad
 import time
-from collections import deque
-
+from cola_prioridad import ColaPrioridad, ColaFIFO
 from estadisticas import Resultado
 
 MAX_NODOS_DEFECTO = 100000
@@ -31,8 +11,6 @@ MOTIVO_SIN_SOLUCION = "No existe solución (se agotó el espacio de búsqueda)"
 
 
 def _crear_resultado(nombre, problema, solucion, explorados, generados, inicio, motivo):
-    """Arma el Resultado final calculando el tiempo y, si hay solución,
-    su penalización y su costo."""
     tiempo = time.perf_counter() - inicio
     penalizacion = 0
     costo = 0
@@ -48,28 +26,20 @@ def _crear_resultado(nombre, problema, solucion, explorados, generados, inicio, 
 # ----------------------------------------------------------------------
 
 def busqueda_amplitud(problema, max_nodos=MAX_NODOS_DEFECTO):
-    """Explora el árbol nivel por nivel: primero todos los estados con 1 clase
-    asignada, luego los de 2 clases, etc. Usa una cola FIFO (el primero que
-    entra es el primero que sale).
-
-    Devuelve la primera solución que encuentra (la de menor profundidad, que
-    aquí siempre es la misma para todas). NO tiene en cuenta las penalizaciones
-    blandas, por eso su solución puede violar restricciones blandas.
-    """
     inicio = time.perf_counter()
     explorados = 0
     generados = 1  # el estado inicial
     solucion = None
     motivo = ""
+    frontera = ColaFIFO()
+    frontera.agregar(problema.estado_inicial())
 
-    frontera = deque([problema.estado_inicial()])
-
-    while frontera:
+    while len(frontera) > 0:
         if explorados >= max_nodos:
             motivo = MOTIVO_LIMITE
             break
 
-        estado = frontera.popleft()          # el más antiguo de la cola
+        estado = frontera.extraer_primero()          # el más antiguo de la cola
         explorados += 1
 
         if problema.es_meta(estado):
@@ -78,7 +48,7 @@ def busqueda_amplitud(problema, max_nodos=MAX_NODOS_DEFECTO):
             break
 
         for hijo, _costo in problema.sucesores(estado):
-            frontera.append(hijo)            # los hijos van al final de la cola
+            frontera.agregar(hijo)            # los hijos van al final de la cola
             generados += 1
 
     if motivo == "":
@@ -93,32 +63,22 @@ def busqueda_amplitud(problema, max_nodos=MAX_NODOS_DEFECTO):
 # ----------------------------------------------------------------------
 
 def busqueda_costo_uniforme(problema, max_nodos=MAX_NODOS_DEFECTO):
-    """Siempre expande el estado con MENOR costo acumulado g (clases asignadas
-    + penalizaciones blandas). Usa una cola de prioridad.
-
-    Como el costo de cada paso es positivo, la primera meta que sale de la
-    cola es la de menor costo total: el horario que menos restricciones
-    blandas viola. La prueba de meta se hace al SACAR el estado de la cola
-    (no al generarlo), que es lo que garantiza esa optimalidad.
-    """
     inicio = time.perf_counter()
     explorados = 0
     generados = 1
     solucion = None
     motivo = ""
 
-    # Cada elemento es (costo, desempate, estado). El 'desempate' es un
-    # contador que evita comparar dos Estado cuando hay costos iguales y hace
-    # que, a igual costo, salga primero el que entró antes.
-    desempate = 0
-    frontera = [(0, desempate, problema.estado_inicial())]
+    # La prioridad es g, el valor guarda (g, estado) para poder usar g al expandir.
+    frontera = ColaPrioridad()
+    frontera.agregar(0, (0, problema.estado_inicial()))
 
-    while frontera:
+    while len(frontera) > 0:
         if explorados >= max_nodos:
             motivo = MOTIVO_LIMITE
             break
 
-        costo, _, estado = heapq.heappop(frontera)   # el de menor costo
+        costo, estado = frontera.extraer_minimo()   # el de menor costo
         explorados += 1
 
         if problema.es_meta(estado):
@@ -127,8 +87,8 @@ def busqueda_costo_uniforme(problema, max_nodos=MAX_NODOS_DEFECTO):
             break
 
         for hijo, costo_paso in problema.sucesores(estado):
-            desempate += 1
-            heapq.heappush(frontera, (costo + costo_paso, desempate, hijo))
+            g_hijo = costo + costo_paso
+            frontera.agregar(g_hijo, (g_hijo, hijo))
             generados += 1
 
     if motivo == "":
@@ -143,14 +103,10 @@ def busqueda_costo_uniforme(problema, max_nodos=MAX_NODOS_DEFECTO):
 # ----------------------------------------------------------------------
 
 class _LimiteExcedido(Exception):
-    """Se usa para cortar la búsqueda cuando se pasa de max_nodos."""
     pass
 
 
 class _BusquedaLimitada:
-    """Búsqueda en profundidad con un límite de profundidad (DLS).
-    Se guarda en una clase para poder llevar la cuenta de nodos entre todas
-    las iteraciones de la búsqueda iterativa."""
 
     def __init__(self, problema, max_nodos):
         self.problema = problema
@@ -159,8 +115,6 @@ class _BusquedaLimitada:
         self.generados = 1
 
     def visitar(self, estado, limite):
-        """Explora 'estado' en profundidad, bajando como máximo 'limite'
-        niveles más. Devuelve el estado meta o None si no lo encuentra."""
         if self.explorados >= self.max_nodos:
             raise _LimiteExcedido()
         self.explorados += 1
@@ -179,13 +133,6 @@ class _BusquedaLimitada:
 
 
 def busqueda_profundidad_iterativa(problema, max_nodos=MAX_NODOS_DEFECTO):
-    """Repite una búsqueda en profundidad aumentando el límite de profundidad
-    0, 1, 2, ... hasta encontrar la meta. Combina lo bueno de BFS (encuentra la
-    meta de menor profundidad) con el poco uso de memoria de la búsqueda en
-    profundidad (solo guarda el camino actual).
-
-    El límite máximo es el número de clases: más profundo que eso no existe.
-    """
     inicio = time.perf_counter()
     busqueda = _BusquedaLimitada(problema, max_nodos)
     solucion = None
@@ -207,7 +154,7 @@ def busqueda_profundidad_iterativa(problema, max_nodos=MAX_NODOS_DEFECTO):
 
 
 # ----------------------------------------------------------------------
-# Catálogo para la interfaz: nombre que se muestra -> función
+# Interfaz: nombre que se muestra -> función
 # ----------------------------------------------------------------------
 
 ALGORITMOS_NO_INFORMADOS = {
