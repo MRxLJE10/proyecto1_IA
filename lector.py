@@ -1,38 +1,11 @@
-"""
-lector.py
-=========
-Lectura y validación de los 4 archivos .txt de entrada.
-
-Formato general (una línea = un registro, campos separados por coma):
-  - Las líneas vacías y las que empiezan por '#' se ignoran (comentarios).
-  - Se pueden leer los archivos en cualquier orden; las referencias entre
-    archivos (profesor de un curso, franjas no disponibles) se revisan
-    después, en enlazar_datos().
-
-    profesores.txt   id,nombre[,franjas_no_disponibles]    (ids separados por ;)
-    cursos.txt       id,materia,id_profesor,grupo
-    salones.txt      id,nombre
-    franjas.txt      id,dia,hora
-
-Cualquier problema (archivo inexistente, línea mal formada, ids repetidos,
-referencias que no existen) lanza ErrorLectura con un mensaje que se puede
-mostrar directamente al usuario en la interfaz.
-"""
-
 from modelo import Profesor, Curso, Salon, Franja
 
 
 class ErrorLectura(Exception):
-    """Error al leer o validar un archivo de entrada."""
     pass
 
 
 def _leer_registros(ruta, nombre_archivo, min_campos, max_campos):
-    """Lee un archivo y devuelve una lista de (numero_de_linea, [campos]).
-
-    Se encarga de lo común a los 4 archivos: abrir, saltar comentarios y
-    líneas vacías, separar por comas y verificar la cantidad de campos.
-    """
     try:
         # utf-8-sig tolera el BOM que a veces agrega el Bloc de notas
         with open(ruta, encoding="utf-8-sig") as archivo:
@@ -139,12 +112,6 @@ def leer_cursos(ruta):
 # ----------------------------------------------------------------------
 
 def enlazar_datos(profesores, cursos, salones, franjas):
-    """Revisa que los 4 archivos sean coherentes entre sí y conecta cada
-    Curso con su objeto Profesor (curso.profesor).
-
-    Se debe llamar cuando ya se leyeron los 4 archivos y antes de crear el
-    problema. Lanza ErrorLectura si algo no cuadra.
-    """
     por_id = {p.id: p for p in profesores}
     for curso in cursos:
         if curso.id_profesor not in por_id:
@@ -165,8 +132,6 @@ def enlazar_datos(profesores, cursos, salones, franjas):
 
 
 def cargar_datos(ruta_profesores, ruta_cursos, ruta_salones, ruta_franjas):
-    """Atajo: lee los 4 archivos, los enlaza y devuelve
-    (profesores, cursos, salones, franjas)."""
     profesores = leer_profesores(ruta_profesores)
     cursos = leer_cursos(ruta_cursos)
     salones = leer_salones(ruta_salones)

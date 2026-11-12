@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
-
 from lector import (leer_profesores, leer_cursos, leer_salones, leer_franjas,
                     cargar_datos, ErrorLectura)
 from modelo import dias_de, horas_de

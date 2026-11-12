@@ -1,16 +1,3 @@
-"""
-cola_prioridad.py
-=================
-La usan la búsqueda de costo uniforme y A*.
-
-Cada elemento se guarda como (prioridad, orden, valor):
-  - prioridad: el número por el que se ordena (g en UCS, f = g + h en A*)
-  - orden:     contador que aumenta en cada inserción; desempata cuando dos
-               prioridades son iguales, así nunca se comparan los estados
-  - valor:     lo que se quiere sacar (por ejemplo (g, estado))
-"""
-
-
 class ColaPrioridad:
 
     def __init__(self):
@@ -71,3 +58,29 @@ class ColaPrioridad:
                 break
             self._intercambiar(i, menor)
             i = menor
+
+class ColaFIFO:
+    """Fila: el primero que entra es el primero que sale. """
+
+    def __init__(self):
+        self._datos = []
+        self._inicio = 0
+
+    def __len__(self):
+        return len(self._datos) - self._inicio
+
+    def agregar(self, valor):
+        """Agrega al final de la fila."""
+        self._datos.append(valor)
+
+    def extraer_primero(self):
+        """Quita y devuelve el elemento del frente."""
+        if len(self) == 0:
+            raise IndexError("La cola está vacía")
+        valor = self._datos[self._inicio]
+        self._datos[self._inicio] = None   # libera la referencia
+        self._inicio += 1
+        if self._inicio * 2 >= len(self._datos):
+            self._datos = self._datos[self._inicio:]
+            self._inicio = 0
+        return valor

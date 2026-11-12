@@ -18,6 +18,7 @@ from problema import ProblemaHorarios
 from busqueda_no_informada import (busqueda_amplitud, busqueda_costo_uniforme,
                                    busqueda_profundidad_iterativa,
                                    ALGORITMOS_NO_INFORMADOS)
+from cola_prioridad import ColaFIFO
 from a_asterisco import a_asterisco, preparar_heuristica, heuristica
 from estadisticas import Estadisticas
 
@@ -203,13 +204,24 @@ def prueba_consistencia():
             pendientes.append(hijo)
     assert revisadas > 0
 
+def prueba_cola_fifo():
+    f = ColaFIFO()
+    for v in ["a", "b", "c"]:
+        f.agregar(v)
+    assert [f.extraer_primero() for _ in range(3)] == ["a", "b", "c"]
+    try:
+        f.extraer_primero()
+        raise AssertionError("debía lanzar IndexError")
+    except IndexError:
+        pass
+
 
 if __name__ == "__main__":
     pruebas = [prueba_lectura_correcta, prueba_lectura_errores,
                prueba_restricciones_duras, prueba_restricciones_blandas,
                prueba_algoritmos_con_solucion, prueba_a_asterisco,
                prueba_sin_solucion, prueba_limite_de_nodos,
-               prueba_estadisticas, prueba_grilla, prueba_consistencia]
+               prueba_estadisticas, prueba_grilla, prueba_consistencia, prueba_cola_fifo]
     for prueba in pruebas:
         prueba()
         print(f"OK  {prueba.__name__}")

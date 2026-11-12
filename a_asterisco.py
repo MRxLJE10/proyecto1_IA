@@ -1,13 +1,3 @@
-"""
-a_asterisco.py
-==============
-Búsqueda A* sobre ProblemaHorarios.
-
-f(n) = g(n) + h(n)
-  g(n): costo real acumulado desde el inicio hasta n
-  h(n): cota inferior del costo que falta para llegar a una meta
-"""
-
 import time
 
 from problema import COSTO_BASE
@@ -33,12 +23,10 @@ def preparar_heuristica(problema):
 
 
 def heuristica(sufijos, estado):
-    """Cota inferior del costo restante. Admisible y consistente."""
     return sufijos[len(estado)]
 
 
 def _crear_resultado(problema, solucion, explorados, generados, inicio, motivo):
-    """Arma el Resultado final con el mismo formato que las demás búsquedas."""
     tiempo = time.perf_counter() - inicio
     penalizacion = 0
     costo = 0
@@ -50,9 +38,6 @@ def _crear_resultado(problema, solucion, explorados, generados, inicio, motivo):
 
 
 def a_asterisco(problema, max_nodos=MAX_NODOS_DEFECTO):
-    """Busca el horario de menor costo usando f = g + h.
-    Devuelve un Resultado. Si se supera max_nodos, el motivo lo indica.
-    """
     inicio = time.perf_counter()
     explorados = 0
     generados = 1
