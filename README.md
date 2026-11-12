@@ -9,7 +9,9 @@ python main.py      # abre la interfaz gráfica
 python pruebas.py   # corre las pruebas automáticas
 ```
 
-Requiere solo la biblioteca estándar de Python (incluye `tkinter`).
+## Dependencias
+
+Todas las estructuras de datos y algoritmos están implementados desde cero: la cola de prioridad (`ColaPrioridad`) y la fila (`ColaFIFO`) están en `cola_prioridad.py`. El proyecto solo usa dos módulos de la biblioteca estándar de Python: `time` para medir tiempos y `tkinter` para la interfaz.
 
 ## Archivos
 
@@ -21,11 +23,11 @@ Requiere solo la biblioteca estándar de Python (incluye `tkinter`).
 | `lector.py` | Lee y valida los 4 `.txt`. `ErrorLectura` trae mensajes listos para mostrar. |
 | `restricciones.py` | Restricciones duras (conflictos) y blandas (penalizaciones). |
 | `problema.py` | `ProblemaHorarios`: estado inicial, sucesores, meta, costo y penalización. |
-| `cola_prioridad.py` | Cola de prioridad (min-heap) implementada desde cero. La usan UCS y A*. |
+| `cola_prioridad.py` | Cola de prioridad (`ColaPrioridad`) y fila FIFO (`ColaFIFO`), ambas implementadas desde cero. La cola de prioridad la usan UCS y A*; la fila, BFS. |
 | `busqueda_no_informada.py` | BFS, costo uniforme y profundidad iterativa. |
 | `a_asterisco.py` | A* y la heurística `preparar_heuristica` / `heuristica`. |
 | `estadisticas.py` | `Resultado` de cada ejecución y tabla comparativa `Estadisticas`. |
-| `pruebas.py` | Pruebas automáticas de lectura, restricciones, algoritmos y heurística. |
+| `pruebas.py` | Pruebas automáticas de lectura, restricciones, colas, algoritmos y heurística. |
 | `datos/` | Ejemplo con solución. |
 | `datos_penalizacion/` | Ejemplo con solución donde un profesor no tiene franjas disponibles. Muestra la ventaja de A* sobre UCS. |
 | `datos_sin_solucion/` | Ejemplo sin solución. |
@@ -74,7 +76,7 @@ Las clases se asignan siempre en el orden de `cursos.txt`. Un estado es la lista
 
 ## Algoritmos
 
-- **BFS (amplitud):** cola FIFO. Encuentra una solución válida, pero ignora las penalizaciones, así que puede no ser la de menor costo.
+- **BFS (amplitud):** fila FIFO propia (`ColaFIFO`). Encuentra una solución válida, pero ignora las penalizaciones, así que puede no ser la de menor costo.
 - **Costo uniforme (UCS):** cola de prioridad por costo acumulado *g*. Encuentra el horario de menor costo (óptimo).
 - **Profundidad iterativa (IDS):** búsqueda en profundidad con límite 0, 1, 2… hasta encontrar la meta.
 - **A\*:** cola de prioridad por *f = g + h*. Encuentra el mismo horario óptimo que UCS, explorando menos nodos cuando la heurística aporta información.
